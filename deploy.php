@@ -194,7 +194,7 @@ Running as <b><?php echo trim(shell_exec('whoami')); ?></b>.
 
 <?php
 // Check if the required programs are available
-$requiredBinaries = array('git', 'rsync');
+$requiredBinaries = array('git');
 if (defined('BACKUP_DIR') && BACKUP_DIR !== false) {
 	$requiredBinaries[] = 'tar';
 	if (!is_dir(BACKUP_DIR) || !is_writable(BACKUP_DIR)) {
@@ -303,7 +303,7 @@ foreach (unserialize(EXCLUDE) as $exc) {
 }
 // Deployment command
 $commands[] = sprintf(
-	'rsync -rltgoDzvO %s %s %s %s'
+	'~/bin/rsync -rltgoDzvO %s %s %s %s'
 	, TMP_DIR
 	, TARGET_DIR
 	, (DELETE_FILES) ? '--delete-after' : ''
@@ -380,9 +380,25 @@ Cleaning up temporary files ...
 		break;
 	}
 }
+
+if($return_code === 0) {
+	if (EMAIL_ON_SUCCESS) {
+		$success = sprintf(
+		'Deployment successful on %s using %s!'
+		, $_SERVER['HTTP_HOST']
+		, __FILE__
+		);
+		$headers = array();
+		$headers[] = sprintf('From: Simple PHP Git deploy script <simple-php-git-deploy@%s>', $_SERVER['HTTP_HOST']);
+		$headers[] = sprintf('X-Mailer: PHP/%s', phpversion());
+		mail(EMAIL_ON_SUCCESS, $success, 'Deployed to kgdinesh.in successfully', implode("\r\n", $headers));
+	}
+}
+
 ?>
 
 Done.
+
 </pre>
 </body>
 </html>
